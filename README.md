@@ -77,10 +77,10 @@ Completed:
 - Sample customer and transaction repositories.
 - Inclusive transaction date filtering.
 - Calculator and repository unit tests.
+- Asynchronous transaction fetching.
 
 Remaining:
 
-- Asynchronous transaction fetching.
 - Monthly and overall reward aggregation.
 - REST endpoints.
 - API validation and error responses.
@@ -105,7 +105,7 @@ Alternatively, with Maven installed and JAVA_HOME pointing to JDK 8:
 
     mvn test
 
-## Verified test results
+## Previous verification 
 
 Maven test run completed successfully:
 
@@ -125,3 +125,38 @@ empty transaction results, and invalid query arguments.
 
 Maven generates detailed reports in target/surefire-reports.
 Generated reports and build output are excluded from Git.
+
+
+## Asynchronous fetching update
+
+TransactionFetchService simulates asynchronous data retrieval from
+the in-memory transaction repository.
+
+Spring invokes the service through an async proxy and executes the
+fetch on the transactionExecutor thread pool.
+
+Executor settings:
+
+- Core pool size: 2
+- Maximum pool size: 4
+- Queue capacity: 50
+- Thread name prefix: transaction-fetch-
+- Shutdown wait limit: 10 seconds
+
+The service returns a CompletableFuture containing the transactions.
+Repository failures complete the future exceptionally.
+No external HTTP request or artificial delay is used.
+
+### Latest verification
+
+    Tests run: 34, Failures: 0, Errors: 0, Skipped: 0
+    BUILD SUCCESS
+
+TransactionFetchServiceTest adds three checks:
+
+- Fetching executes on a background thread.
+- No matching transactions produce an empty list.
+- Repository failures propagate through the future.
+
+Asynchronous fetching is complete. Monthly aggregation, REST
+endpoints, API error handling, and their tests remain to be implemented.
