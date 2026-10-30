@@ -1,7 +1,7 @@
 # Retailer Rewards API
 
-A Spring Boot REST API project for calculating customer reward points
-from purchase transactions.
+A Spring Boot project for calculating customer reward points from
+purchase transactions.
 
 ## Technology
 
@@ -20,9 +20,7 @@ Points are calculated independently for each transaction:
 - One point per whole dollar spent above $50 and up to $100.
 - Two points per whole dollar spent above $100.
 
-For example, a $120 purchase earns:
-
-(100 - 50) + (120 - 100) × 2 = 90 points.
+A $120 purchase earns 50 + (20 x 2) = 90 points.
 
 ## Assumptions
 
@@ -30,23 +28,58 @@ For example, a $120 purchase earns:
   separately for each transaction.
 - A $120.75 purchase earns 90 points.
 - Zero-value purchases earn zero points.
-- Null and negative transaction amounts are rejected.
+- Null and negative amounts are rejected.
 - Calculations exceeding the long points range are rejected.
-- Reward points are calculated per transaction before aggregation.
-  Two separate $60 purchases earn 20 points in total.
+- Two separate $60 purchases earn 20 points in total.
+- Date filtering includes both the start date and end date.
+- Dates represent purchase calendar dates without a time component.
+- Sample data is stored in memory; no database is required.
+
+## Design
+
+- model: Immutable customer and transaction objects.
+- repository: Sample data access and inclusive date filtering.
+- service: Transaction reward calculation.
+
+Repositories expose customer lookup and transaction filtering.
+An unknown customer returns an empty Optional from customer lookup.
+A transaction query without matching purchases returns an empty list.
+
+## Sample dataset
+
+The dataset contains three customers and eleven transactions.
+Nine transactions fall within July through September 2026.
+Two additional transactions fall immediately outside that period.
+
+Expected rewards for 2026-07-01 through 2026-09-30:
+
+| Customer ID | Customer | July | August | September | Total |
+|---|---|---:|---:|---:|---:|
+| 101 | Alice Morgan | 115 | 50 | 100 | 265 |
+| 102 | Brian Wilson | 160 | 0 | 52 | 212 |
+| 103 | Clara Evans | 0 | 0 | 0 | 0 |
+
+These are reference totals for the upcoming aggregation implementation.
+
+Alice has purchases on both date boundaries.
+Brian has no August purchases.
+Clara has no transactions.
+Alice's June 30 and October 1 purchases are outside this date range.
 
 ## Current status
 
 Completed:
 
-- Java 8 and Maven project configuration.
+- Java 8 and Maven configuration.
 - Spring Boot application startup.
 - Transaction reward calculation.
-- Reward calculator unit tests.
+- Customer and transaction models.
+- Sample customer and transaction repositories.
+- Inclusive transaction date filtering.
+- Calculator and repository unit tests.
 
-Not implemented yet:
+Remaining:
 
-- Sample customer and transaction dataset.
 - Asynchronous transaction fetching.
 - Monthly and overall reward aggregation.
 - REST endpoints.
@@ -62,26 +95,33 @@ Not implemented yet:
 5. Run com.retailer.rewards.RewardsApplication.
 
 The application starts on port 8080 by default.
+REST endpoints are not implemented yet.
 
-REST endpoints are not available yet.
+## Run tests
 
-## Tests
+In IntelliJ IDEA, open the Maven tool window and run Lifecycle > test.
 
-Open the following test class in IntelliJ IDEA:
+Alternatively, with Maven installed and JAVA_HOME pointing to JDK 8:
 
-src/test/java/com/retailer/rewards/service/RewardCalculatorTest.java
+    mvn test
 
-Run the complete RewardCalculatorTest class.
+## Verified test results
 
-### Verified results
+Maven test run completed successfully:
 
-17 test executions passed with no failures.
+    Tests run: 31, Failures: 0, Errors: 0, Skipped: 0
+    BUILD SUCCESS
 
-The tests cover:
+| Test class | Executions |
+|---|---:|
+| RewardCalculatorTest | 17 |
+| TransactionRepositoryTest | 10 |
+| CustomerRepositoryTest | 4 |
 
-- Amounts below, at, and above the $50 and $100 thresholds.
-- Zero-value purchases.
-- Decimal amounts using the whole-dollar assumption.
-- Null and negative amounts.
-- Independent calculation for separate purchases.
-- Points exceeding the long range.
+Tests cover reward thresholds, decimal amounts, invalid calculator
+inputs, independent purchases, points overflow, customer lookup,
+dataset protection, customer isolation, inclusive date boundaries,
+empty transaction results, and invalid query arguments.
+
+Maven generates detailed reports in target/surefire-reports.
+Generated reports and build output are excluded from Git.
