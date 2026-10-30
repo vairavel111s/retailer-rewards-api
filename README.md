@@ -147,7 +147,7 @@ The service returns a CompletableFuture containing the transactions.
 Repository failures complete the future exceptionally.
 No external HTTP request or artificial delay is used.
 
-### Latest verification
+### Verification before aggregation
 
     Tests run: 34, Failures: 0, Errors: 0, Skipped: 0
     BUILD SUCCESS
@@ -160,3 +160,34 @@ TransactionFetchServiceTest adds three checks:
 
 Asynchronous fetching is complete. Monthly aggregation, REST
 endpoints, API error handling, and their tests remain to be implemented.
+
+## Reward aggregation update
+
+RewardService calculates monthly and overall rewards for one customer
+or all sample customers within an inclusive date range.
+
+- Points are calculated separately for each transaction.
+- Monthly summaries include months without purchases.
+- Months use YYYY-MM format to distinguish years.
+- Transaction details are sorted by date and transaction ID.
+- Purchase totals retain cents; reward calculations use whole dollars.
+- Unknown customers and invalid date ranges are rejected.
+- Responses remain pending until asynchronous fetching completes.
+- Fetch failures propagate instead of producing misleading zero totals.
+- The all-customer operation fails if any customer fetch fails.
+- Points aggregation detects long overflow.
+
+CustomerRewardResponse includes customer details, the requested date
+range, monthly summaries, transaction details, total spending, and
+total reward points.
+
+### Verification after aggregation
+
+    Tests run: 49, Failures: 0, Errors: 0, Skipped: 0
+    BUILD SUCCESS
+
+RewardServiceTest contains 15 tests covering aggregation, empty months,
+customers without purchases, partial-month ranges, year boundaries,
+invalid inputs, pending futures, and fetch failures.
+
+REST endpoints and API error handling are not implemented yet.
