@@ -1,0 +1,88 @@
+{
+  "info": {
+    "name": "Retailer Rewards API",
+    "description": "Run the application before sending requests. Sample period: July to September 2026. Expected total points: Alice 265, Brian 212, Clara 0.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Customer rewards - Alice",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/customers/101/rewards?startDate=2026-07-01&endDate=2026-09-30",
+        "description": "Expected: HTTP 200, totalSpent 525.75, totalRewardPoints 265."
+      }
+    },
+    {
+      "name": "All customer rewards",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/rewards?startDate=2026-07-01&endDate=2026-09-30",
+        "description": "Expected: HTTP 200. Customer totals: 101 = 265, 102 = 212, 103 = 0."
+      }
+    },
+    {
+      "name": "Customer without purchases - Clara",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/customers/103/rewards?startDate=2026-07-01&endDate=2026-09-30",
+        "description": "Expected: HTTP 200, totalRewardPoints 0, empty transactions and three monthly summaries."
+      }
+    },
+    {
+      "name": "Unknown customer",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/customers/999/rewards?startDate=2026-07-01&endDate=2026-09-30",
+        "description": "Expected: HTTP 404, message: Customer not found with ID: 999."
+      }
+    },
+    {
+      "name": "Reversed date range",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/rewards?startDate=2026-09-30&endDate=2026-07-01",
+        "description": "Expected: HTTP 400, message: Start date must not be after end date."
+      }
+    },
+    {
+      "name": "Missing end date",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/rewards?startDate=2026-07-01",
+        "description": "Expected: HTTP 400, message: Required parameter is missing: endDate."
+      }
+    },
+    {
+      "name": "Invalid calendar date",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/rewards?startDate=2026-02-30&endDate=2026-09-30",
+        "description": "Expected: HTTP 400 because February 30 is not a valid date."
+      }
+    },
+    {
+      "name": "Non-positive customer ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/customers/0/rewards?startDate=2026-07-01&endDate=2026-09-30",
+        "description": "Expected: HTTP 400, message: Customer ID must be positive."
+      }
+    }
+  ]
+}

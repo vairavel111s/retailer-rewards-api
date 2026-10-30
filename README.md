@@ -351,3 +351,20 @@ sample data.
 
 Database persistence, authentication, transaction creation and a
 frontend are outside the current implementation.
+
+## Test using Postman
+
+1. Start the application using the instructions above.
+2. Open Postman and select Import.
+3. Import `postman/Retailer-Rewards-API.postman_collection.json`.
+4. The collection variable `baseUrl` defaults to `http://localhost:8080`.
+5. Open a request and click Send.
+
+The collection includes eight requests covering customer rewards,
+all customers, a customer without purchases, an unknown customer,
+a reversed date range, a missing end date, an invalid calendar date
+and a non-positive customer ID.
+
+Each request description contains the expected status and result.
+These requests support manual verification; automated tests run
+separately using `mvn test`.
